@@ -11,4 +11,4 @@ Respositório criado para os desafios de projeto dos cursos de bootcamps de java
 - [Conta Bancaria](Conta_Bancaria)
     - Exercitar conceitos básicos como Scanner e entrada de dados
 - [Contador](Contador)
-    - Exercitar fluxo de execução com estruturas de decisão de repetição e *exceptions*
+    - Exercitar fluxo de execução com estruturas de decisão, de repetição e *exceptions*
