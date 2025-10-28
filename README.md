@@ -14,3 +14,5 @@ Respositório criado para os desafios de projeto dos cursos de bootcamps de java
     - Exercitar fluxo de execução com estruturas de decisão, de repetição e *exceptions*
 - [Iphone](Iphone)
     - Exercitar diagramação UML
+- [Banco Digital](Banco_Digital)
+    - Exercitar fundamentos de POO como herança, polimorfismo e encapsulamento
