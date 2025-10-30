@@ -48,6 +48,8 @@ public class Quadradinho
     @Override
     public String toString()
     {
-        return (this.numero == null) ? "." : String.valueOf(this.numero);
+        String valor = (this.numero == null) ? "." : String.valueOf(this.numero);
+        String cor = (this.estado == Estado.FIXO) ? "\033[34;1m" : "\033[0m";
+        return String.format("%s%s\033[0m", cor, valor);
     }
 }

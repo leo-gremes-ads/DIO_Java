@@ -10,6 +10,7 @@ public class Jogo
 {
     private Quadradinho[][] mapa;
     private int espacosLivres;
+    private boolean fimDeJogo;
 
     public Jogo(String nomeArquivo) 
     throws FileNotFoundException, IOException, MapaInvalidoException
@@ -24,49 +25,159 @@ public class Jogo
             throw new MapaInvalidoException("Dimensões inválidas");
         if (!Analisador.numerosValidos(mapa))
             throw new MapaInvalidoException("Mapa com números inválidos");
-        if (!Analisador.jogoEhValido(mapa))
+        if (!Analisador.jogoEhValido(mapa, false))
             throw new MapaInvalidoException("Mapa com valores duplicados");
         this.espacosLivres = (int)Arrays.stream(this.mapa).flatMap(m -> Arrays.stream(m)).filter(Quadradinho::estaDisponivel).count();
-        System.out.println("Espacos livres = " + espacosLivres);
         if (espacosLivres == 0)
             throw new MapaInvalidoException("Mapa está totalmente preenchido");
-
+        fimDeJogo = false;
     }
 
-    public void escrever()
+    // Menu
+    public void menu()
     {
         Scanner s = new Scanner(System.in);
-        String jogada;
-        String[] campos;
-        int num, linha, coluna;
+        String opcao = null;
 
-        System.out.println("""
-                Digite o número e as coordenadas(linha, coluna) da célula que pretende preencher
-                (Ex.: 8 2 3). Digite 0 para interromper:
-                """);
-        jogada = s.nextLine();
-        campos = jogada.trim().split(" ");
+        while (!fimDeJogo) {
+            System.out.print("""
+
+                    ------------- Menu -------------
+                    1 - Preencher célula
+                    2 - Apagar célula
+                    3 - Mostrar Status do jogo
+                    4 - Sair
+
+                    Digite a opção desejada:\s """);
+            opcao = s.nextLine();
+            if (opcao.equals("1"))
+                preencher(s);
+            else if (opcao.equals("2"))
+                apagar(s);
+            else if (opcao.equals("3"))
+                mostrarStatus();
+            else if (opcao.equals("4"))
+                break;
+            else
+                System.out.println("\nOpção inválida");
+        }
         s.close();
     }
 
-    private int[] validarJogada(String jogada) throws JogadaInvalidaException
+    // Preencher
+    private void preencher(Scanner s)
+    {
+        String jogada = "";
+
+        System.out.println("""
+                Digite o número e as coordenadas(linha, coluna) da célula que pretende preencher
+                (Ex.: 8 2 3). Digite 0 para interromper.
+                """);
+        while (true) {
+            mostrarMapa();
+            System.out.print("Insira o próximo preenchimento: ");
+            jogada = s.nextLine();
+            if (jogada.equals("0"))
+                break;
+            try {
+                validarPreenchimento(jogada);
+            } catch (JogadaInvalidaException e) {
+                System.out.println(e.getMessage());
+            }
+            if (espacosLivres == 0) {
+                if (Analisador.jogoEhValido(mapa, false)) {
+                    mostrarMensagemVitoria();
+                    fimDeJogo = true;
+                    return;
+                } else
+                    System.out.println("\nTodas as células estão preenchidas, porém existem um ou mais erros no jogo." +
+                        "Por favor, consulte o status e/ou apague algumas células para corrigir o(s) erro(s).");
+            }
+        }
+    }
+
+    private void validarPreenchimento(String jogada) throws JogadaInvalidaException
     {
         String[] campos = jogada.trim().split(" ");
         int num, linha, coluna;
         if (campos.length != 3)
-            throw new JogadaInvalidaException("Formato de jogada inválido");
+            throw new JogadaInvalidaException("Formato de preenchimento inválido");
         try {
             num = Integer.parseInt(campos[0]);
             linha = Integer.parseInt(campos[1]);
             coluna = Integer.parseInt(campos[2]);
         } catch (NumberFormatException e) {
-            throw new JogadaInvalidaException("Numeros invalidos");
-        }        
+            throw new JogadaInvalidaException("Números inválidos");
+        }
+        if (num <= 0 || num > 9)
+            throw new JogadaInvalidaException("Número deve estar entre 0 e 9");   
+        if (linha < 0 || linha >= 9 || coluna < 0 || coluna >=9)  
+            throw new JogadaInvalidaException("Coordenadas inválidas");
+        if (!mapa[linha][coluna].estaDisponivel())
+            throw new JogadaInvalidaException("Célula já está preenchida");
+        mapa[linha][coluna].preencher(num);
+        espacosLivres--;
     }
 
-    public void mostrarMapa()
+    // Apagar
+    private void apagar(Scanner s)
+    {
+        String jogada = "";
+
+        System.out.println("""
+                Digite as coordenadas(linha, coluna) da célula que deseja limpar (Ex.: 2 3).
+                Digite 0 para interromper
+                """);
+        while (true) {
+            mostrarMapa();
+            System.out.print("Insira as coordenadas: ");
+            jogada = s.nextLine();
+            if (jogada.equals("0"))
+                break;
+            try {
+                validarLimpeza(jogada);
+            } catch (JogadaInvalidaException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void validarLimpeza(String jogada) throws JogadaInvalidaException
+    {
+        String[] campos = jogada.trim().split(" ");
+        int linha, coluna;
+
+        if (campos.length != 2)
+            throw new JogadaInvalidaException("Formato de preenchimento inválido");
+        try {
+            linha = Integer.parseInt(campos[0]);
+            coluna = Integer.parseInt(campos[1]);
+        } catch (NumberFormatException e) {
+            throw new JogadaInvalidaException("Números inválidos");
+        }
+        if (linha < 0 || linha >= 9 || coluna < 0 || coluna >=9)  
+            throw new JogadaInvalidaException("Coordenadas inválidas");
+        if (mapa[linha][coluna].getEstado() == Estado.FIXO)
+            throw new JogadaInvalidaException("Não pode apagar célula inicial");
+        if (mapa[linha][coluna].getEstado() == Estado.LIVRE)
+            throw new JogadaInvalidaException("Não pode apagar célula vazia");
+        mapa[linha][coluna].apagar();
+        espacosLivres++;   
+    }
+
+    // Status
+    private void mostrarStatus()
+    {
+        mostrarMapa();
+        if (Analisador.jogoEhValido(mapa, true))
+            System.out.println("Jogo OK!");
+    }
+
+    // Outros
+    private void mostrarMapa()
     {
         System.out.printf("""
+
                     0 1 2   3 4 5   6 7 8
 
                 0   %s %s %s | %s %s %s | %s %s %s
@@ -80,6 +191,7 @@ public class Jogo
                 6   %s %s %s | %s %s %s | %s %s %s
                 7   %s %s %s | %s %s %s | %s %s %s
                 8   %s %s %s | %s %s %s | %s %s %s
+
                 """,
                 mapa[0][0], mapa[0][1], mapa[0][2], mapa[0][3], mapa[0][4], mapa[0][5], mapa[0][6], mapa[0][7], mapa[0][8],
                 mapa[1][0], mapa[1][1], mapa[1][2], mapa[1][3], mapa[1][4], mapa[1][5], mapa[1][6], mapa[1][7], mapa[1][8],
@@ -93,5 +205,17 @@ public class Jogo
                 );
     }
 
-    public Quadradinho[][] getMapa() { return this.mapa; }
+    private void mostrarMensagemVitoria()
+    {
+        System.out.println("""
+            \n    \033[32;1m███████████                                █████                                
+            ░░███░░░░░███                              ░░███                                 
+            ░███    ░███  ██████   ████████   ██████   ░███████   ██████  ████████    █████ 
+            ░██████████  ░░░░░███ ░░███░░███ ░░░░░███  ░███░░███ ███░░███░░███░░███  ███░░  
+            ░███░░░░░░    ███████  ░███ ░░░   ███████  ░███ ░███░███████  ░███ ░███ ░░█████ 
+            ░███         ███░░███  ░███      ███░░███  ░███ ░███░███░░░   ░███ ░███  ░░░░███
+            █████       ░░████████ █████    ░░████████ ████████ ░░██████  ████ █████ ██████ 
+            ░░░░░         ░░░░░░░░ ░░░░░      ░░░░░░░░ ░░░░░░░░   ░░░░░░  ░░░░ ░░░░░ ░░░░░░\033[0m
+        """);
+    }
 }

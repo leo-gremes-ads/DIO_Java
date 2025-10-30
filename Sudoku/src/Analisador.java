@@ -9,6 +9,7 @@ public abstract class Analisador
 {
     private static final Predicate<Integer> naoNulo = i -> i != null;
 
+    // Validação da grade
     public static boolean dimensoesValidas(Quadradinho[][] mapa)
     {
         if (Arrays.stream(mapa).count() != 9)
@@ -26,8 +27,9 @@ public abstract class Analisador
             .filter(i -> i != null && (i > 9 || i < 0))
             .count() == 0;
     }
-    
-    public static boolean jogoEhValido(Quadradinho[][] mapa)
+
+    // Validação do jogo  
+    public static boolean jogoEhValido(Quadradinho[][] mapa, boolean mostrarLog)
     {
         Set<Integer> unicos = new HashSet<>();
         StringBuilder erros = new StringBuilder();
@@ -37,8 +39,10 @@ public abstract class Analisador
         ehValido = verificarColunas(mapa, erros, unicos) && ehValido;
         ehValido = verificarQuadrados(mapa, erros, unicos) && ehValido;
 
-        if (!ehValido)
+        if (!ehValido && mostrarLog) {
+            System.out.println("Jogo com erros:");
             System.out.print(erros.toString());
+        }
         return ehValido;
     }
     
