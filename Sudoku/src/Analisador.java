@@ -9,19 +9,35 @@ public abstract class Analisador
 {
     private static final Predicate<Integer> naoNulo = i -> i != null;
 
+    public static boolean dimensoesValidas(Quadradinho[][] mapa)
+    {
+        if (Arrays.stream(mapa).count() != 9)
+            return false;
+        if (Arrays.stream(mapa).map(ar -> ar.length).filter(t -> t != 9).count() > 0)
+            return false;
+        return true;
+    }
+
+    public static boolean numerosValidos(Quadradinho[][] mapa)
+    {
+        return Arrays.stream(mapa)
+            .flatMap(v -> Arrays.stream(v))
+            .map(Quadradinho::getNumero)
+            .filter(i -> i != null && (i > 9 || i < 0))
+            .count() == 0;
+    }
+    
     public static boolean jogoEhValido(Quadradinho[][] mapa)
     {
         Set<Integer> unicos = new HashSet<>();
         StringBuilder erros = new StringBuilder();
         boolean ehValido = true;
 
-        ehValido = ehValido && verificarLinhas(mapa, erros, unicos);
-        ehValido = ehValido && verificarColunas(mapa, erros, unicos);
-        ehValido = ehValido && verificarQuadrados(mapa, erros, unicos);
+        ehValido = verificarLinhas(mapa, erros, unicos);
+        ehValido = verificarColunas(mapa, erros, unicos) && ehValido;
+        ehValido = verificarQuadrados(mapa, erros, unicos) && ehValido;
 
-        if (ehValido)
-            System.out.println("Mapa OK!");
-        else
+        if (!ehValido)
             System.out.print(erros.toString());
         return ehValido;
     }
