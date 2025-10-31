@@ -16,3 +16,5 @@ Respositório criado para os desafios de projeto dos cursos de bootcamps de java
     - Exercitar diagramação UML
 - [Banco Digital](Banco_Digital)
     - Exercitar fundamentos de POO como herança, polimorfismo e encapsulamento
+- [Sudoku](Sudoku)
+    - Exercitar vários conceitos de Java, como *collections*, *streams*, *exceptions*, *enums*, *tratamento de erros*, etc.

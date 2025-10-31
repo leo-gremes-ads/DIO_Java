@@ -46,7 +46,8 @@ public class Jogo
                     1 - Preencher célula
                     2 - Apagar célula
                     3 - Mostrar Status do jogo
-                    4 - Sair
+                    4 - Limpar
+                    5 - Sair
 
                     Digite a opção desejada:\s """);
             opcao = s.nextLine();
@@ -57,6 +58,8 @@ public class Jogo
             else if (opcao.equals("3"))
                 mostrarStatus();
             else if (opcao.equals("4"))
+                limparJogo();
+            else if (opcao.equals("5"))
                 break;
             else
                 System.out.println("\nOpção inválida");
@@ -165,6 +168,15 @@ public class Jogo
         espacosLivres++;   
     }
 
+    // Limpar
+    public void limparJogo()
+    {
+        espacosLivres += (int)Arrays.stream(mapa)
+            .flatMap(arr -> Arrays.stream(arr))
+            .filter(q -> q.getEstado() == Estado.PREENCHIDO)
+            .peek(Quadradinho::apagar).count();
+    }
+
     // Status
     private void mostrarStatus()
     {
@@ -192,6 +204,8 @@ public class Jogo
                 7   %s %s %s | %s %s %s | %s %s %s
                 8   %s %s %s | %s %s %s | %s %s %s
 
+                Espacos Livres = %d
+
                 """,
                 mapa[0][0], mapa[0][1], mapa[0][2], mapa[0][3], mapa[0][4], mapa[0][5], mapa[0][6], mapa[0][7], mapa[0][8],
                 mapa[1][0], mapa[1][1], mapa[1][2], mapa[1][3], mapa[1][4], mapa[1][5], mapa[1][6], mapa[1][7], mapa[1][8],
@@ -201,7 +215,8 @@ public class Jogo
                 mapa[5][0], mapa[5][1], mapa[5][2], mapa[5][3], mapa[5][4], mapa[5][5], mapa[5][6], mapa[5][7], mapa[5][8],
                 mapa[6][0], mapa[6][1], mapa[6][2], mapa[6][3], mapa[6][4], mapa[6][5], mapa[6][6], mapa[6][7], mapa[6][8],
                 mapa[7][0], mapa[7][1], mapa[7][2], mapa[7][3], mapa[7][4], mapa[7][5], mapa[7][6], mapa[7][7], mapa[7][8],
-                mapa[8][0], mapa[8][1], mapa[8][2], mapa[8][3], mapa[8][4], mapa[8][5], mapa[8][6], mapa[8][7], mapa[8][8]                
+                mapa[8][0], mapa[8][1], mapa[8][2], mapa[8][3], mapa[8][4], mapa[8][5], mapa[8][6], mapa[8][7], mapa[8][8],
+                espacosLivres             
                 );
     }
 
